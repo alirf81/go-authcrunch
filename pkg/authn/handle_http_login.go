@@ -17,6 +17,12 @@ package authn
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"net/url"
+	"path"
+	"strings"
+	"time"
+
 	"github.com/greenpau/go-authcrunch/pkg/authn/enums/operator"
 	"github.com/greenpau/go-authcrunch/pkg/idp"
 	"github.com/greenpau/go-authcrunch/pkg/ids"
@@ -25,11 +31,6 @@ import (
 	"github.com/greenpau/go-authcrunch/pkg/util"
 	addrutil "github.com/greenpau/go-authcrunch/pkg/util/addr"
 	"go.uber.org/zap"
-	"net/http"
-	"net/url"
-	"path"
-	"strings"
-	"time"
 )
 
 func (p *Portal) handleHTTPLogin(ctx context.Context, w http.ResponseWriter, r *http.Request, rr *requests.Request, usr *user.User) error {
@@ -423,6 +424,15 @@ func (p *Portal) grantAccess(ctx context.Context, w http.ResponseWriter, r *http
 	// forwarded a user to the authentication portal.
 	if cookie, err := r.Cookie(p.cookie.Referer); err == nil {
 		if redirectURL, err := url.Parse(cookie.Value); err == nil {
+			// remove url params with prefix of "ap_"
+			query := redirectURL.Query()
+			for key := range query {
+				if strings.HasPrefix(key, "ap_") {
+					query.Del(key)
+				}
+			}
+			redirectURL.RawQuery = query.Encode()
+			// build redirect response
 			redirectLocation = redirectURL.String()
 			p.logger.Debug(
 				"Detected cookie-based redirect",

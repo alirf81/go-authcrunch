@@ -17,11 +17,12 @@ package oauth
 import (
 	"encoding/json"
 	"fmt"
-	cfgutil "github.com/greenpau/go-authcrunch/pkg/util/cfg"
-	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	cfgutil "github.com/greenpau/go-authcrunch/pkg/util/cfg"
+	"go.uber.org/zap"
 )
 
 func (b *IdentityProvider) fetchUserInfo(tokenData, userData map[string]interface{}) error {
@@ -91,14 +92,8 @@ func (b *IdentityProvider) fetchUserInfo(tokenData, userData map[string]interfac
 		}
 	} else {
 		for k := range userinfo {
-			if _, exists := b.userInfoFields[k]; !exists {
-				delete(userinfo, k)
-			}
-		}
-		if len(userinfo) > 0 {
-			roles = extractUserInfoRoles(userinfo)
-			if len(userinfo) > 0 {
-				userData["userinfo"] = userinfo
+			if _, exists := b.userInfoFields[k]; exists {
+				userData[k] = userinfo[k]
 			}
 		}
 	}

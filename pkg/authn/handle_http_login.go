@@ -324,7 +324,7 @@ func (p *Portal) authorizeLoginRequest(ctx context.Context, w http.ResponseWrite
 		m["origin"] = rr.Upstream.Realm
 	}
 	m["iss"] = util.GetIssuerURL(r)
-	m["addr"] = addrutil.GetSourceAddress(r)
+	// m["addr"] = addrutil.GetSourceAddress(r)
 
 	// Perform user claim transformation if necessary.
 	if err := p.transformUser(ctx, rr, m); err != nil {

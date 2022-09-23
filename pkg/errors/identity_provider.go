@@ -62,4 +62,8 @@ const (
 	ErrIdentityProviderOauthMetadataFetchFailed                 StandardError = "failed to fetch metadata for OAuth 2.0 authorization server: %s"
 	ErrIdentityProviderOauthGetAccessTokenFailed                StandardError = "failed obtaining OAuth 2.0 access token, error: %v"
 	ErrIdentityProviderAuthorizationServerResponseFieldNotFound StandardError = "authorization server response has no %q field"
+
+	ErrIdentityProviderOauthReadRefreshTokenFailed     StandardError = "failed reading OAuth 2.0 refresh token from cookie: %s"
+	ErrIdentityProviderOauthRefreshAccessTokenFailed   StandardError = "failed refreshing OAuth 2.0 access token: %s"
+	ErrIdentityProviderOauthRefreshTokenNotImplemented StandardError = "OAuth 2.0 refresh token not implmented"
 )

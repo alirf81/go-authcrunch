@@ -317,7 +317,7 @@ func (p *Portal) authorizeLoginRequest(ctx context.Context, w http.ResponseWrite
 	}
 
 	m["jti"] = rr.Upstream.SessionID
-	m["exp"] = time.Now().Add(time.Duration(p.keystore.GetTokenLifetime(nil, nil)) * time.Second).UTC().Unix()
+	// m["exp"] = time.Now().Add(time.Duration(p.keystore.GetTokenLifetime(nil, nil)) * time.Second).UTC().Unix()
 	m["iat"] = time.Now().UTC().Unix()
 	m["nbf"] = time.Now().Add(time.Duration(60)*time.Second*-1).UTC().Unix() * 1000
 	if _, exists := m["origin"]; !exists {
@@ -382,7 +382,7 @@ func (p *Portal) authorizeLoginRequest(ctx context.Context, w http.ResponseWrite
 func (p *Portal) grantAccess(ctx context.Context, w http.ResponseWriter, r *http.Request, rr *requests.Request, usr *user.User) {
 	var redirectLocation string
 
-	usr.SetExpiresAtClaim(time.Now().Add(time.Duration(p.keystore.GetTokenLifetime(nil, nil)) * time.Second).UTC().Unix())
+	// usr.SetExpiresAtClaim(time.Now().Add(time.Duration(p.keystore.GetTokenLifetime(nil, nil)) * time.Second).UTC().Unix())
 	usr.SetIssuedAtClaim(time.Now().UTC().Unix())
 	usr.SetNotBeforeClaim(time.Now().Add(time.Duration(60) * time.Second * -1).UTC().Unix())
 
@@ -409,6 +409,11 @@ func (p *Portal) grantAccess(ctx context.Context, w http.ResponseWriter, r *http
 	// Add a cookie with identity token, if id_token is available.
 	if rr.Response.IdentityTokenCookie.Enabled {
 		w.Header().Add("Set-Cookie", p.cookie.GetIdentityTokenCookie(rr.Response.IdentityTokenCookie.Name, rr.Response.IdentityTokenCookie.Payload))
+	}
+
+	// Add a cookie with refresh token, if refresh_token is available
+	if rr.Response.RefreshToken != "" {
+		w.Header().Add("Set-Cookie", p.cookie.GetIdentityTokenCookie("refresh_token", rr.Response.RefreshToken))
 	}
 
 	if rr.Response.Workflow == "json-api" {
@@ -447,8 +452,10 @@ func (p *Portal) grantAccess(ctx context.Context, w http.ResponseWriter, r *http
 		// Redirect authenticated user to portal page when no redirect cookie found.
 		redirectLocation = rr.Upstream.BaseURL + path.Join(rr.Upstream.BasePath, "/portal")
 	}
-	w.Header().Set("Location", redirectLocation)
-	rr.Response.Code = http.StatusSeeOther
+	if rr.DisableRedirect != true {
+		w.Header().Set("Location", redirectLocation)
+		rr.Response.Code = http.StatusSeeOther
+	}
 	return
 }
 

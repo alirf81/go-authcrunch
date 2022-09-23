@@ -15,23 +15,25 @@
 package requests
 
 import (
-	"go.uber.org/zap"
 	"net/http"
+
+	"go.uber.org/zap"
 )
 
 // Request hold the data associated with identity database
 type Request struct {
-	ID       string      `json:"id,omitempty" xml:"id,omitempty" yaml:"id,omitempty"`
-	Upstream Upstream    `json:"upstream,omitempty" xml:"upstream,omitempty" yaml:"upstream,omitempty"`
-	Sandbox  Sandbox     `json:"sandbox,omitempty" xml:"sandbox,omitempty" yaml:"sandbox,omitempty"`
-	User     User        `json:"user,omitempty" xml:"user,omitempty" yaml:"user,omitempty"`
-	Query    Query       `json:"query,omitempty" xml:"query,omitempty" yaml:"query,omitempty"`
-	Key      Key         `json:"key,omitempty" xml:"key,omitempty" yaml:"key,omitempty"`
-	MfaToken MfaToken    `json:"mfa_token,omitempty" xml:"mfa_token,omitempty" yaml:"mfa_token,omitempty"`
-	WebAuthn WebAuthn    `json:"web_authn,omitempty" xml:"web_authn,omitempty" yaml:"web_authn,omitempty"`
-	Flags    Flags       `json:"flags,omitempty" xml:"flags,omitempty" yaml:"flags,omitempty"`
-	Response Response    `json:"response,omitempty" xml:"response,omitempty" yaml:"response,omitempty"`
-	Logger   *zap.Logger `json:"-"`
+	ID              string      `json:"id,omitempty" xml:"id,omitempty" yaml:"id,omitempty"`
+	Upstream        Upstream    `json:"upstream,omitempty" xml:"upstream,omitempty" yaml:"upstream,omitempty"`
+	Sandbox         Sandbox     `json:"sandbox,omitempty" xml:"sandbox,omitempty" yaml:"sandbox,omitempty"`
+	User            User        `json:"user,omitempty" xml:"user,omitempty" yaml:"user,omitempty"`
+	Query           Query       `json:"query,omitempty" xml:"query,omitempty" yaml:"query,omitempty"`
+	Key             Key         `json:"key,omitempty" xml:"key,omitempty" yaml:"key,omitempty"`
+	MfaToken        MfaToken    `json:"mfa_token,omitempty" xml:"mfa_token,omitempty" yaml:"mfa_token,omitempty"`
+	WebAuthn        WebAuthn    `json:"web_authn,omitempty" xml:"web_authn,omitempty" yaml:"web_authn,omitempty"`
+	Flags           Flags       `json:"flags,omitempty" xml:"flags,omitempty" yaml:"flags,omitempty"`
+	Response        Response    `json:"response,omitempty" xml:"response,omitempty" yaml:"response,omitempty"`
+	DisableRedirect bool        `json:"disable_redirect,omitempty" xml:"disable_redirect,omitempty" yaml:"disable_redirect,omitempty"`
+	Logger          *zap.Logger `json:"-"`
 }
 
 // Response hold the response associated with identity database
@@ -43,6 +45,7 @@ type Response struct {
 	Authenticated       bool                `json:"authenticated,omitempty" xml:"authenticated,omitempty" yaml:"authenticated,omitempty"`
 	Authorized          bool                `json:"authorized,omitempty" xml:"authorized,omitempty" yaml:"authorized,omitempty"`
 	IdentityTokenCookie IdentityTokenCookie `json:"-" xml:"-" yaml:"-"`
+	RefreshToken        string              `json:"refresh_token,omitempty" xml:"refresh_token,omitempty" yaml:"refresh_token,omitempty"`
 	// Workflow is the type of workflow the response should follow.
 	Workflow string `json:"workflow,omitempty" xml:"workflow,omitempty" yaml:"workflow,omitempty"`
 	Title    string `json:"title,omitempty" xml:"title,omitempty" yaml:"title,omitempty"`

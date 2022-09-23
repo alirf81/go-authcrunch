@@ -62,6 +62,8 @@ const (
 	// LookupAPIKey operator signals the retrieval of user identity associated
 	// with an API key
 	LookupAPIKey
+	// RefreshToken operator signals the refresh of a token.
+	RefreshToken
 )
 
 // String returns string representation of an operator.

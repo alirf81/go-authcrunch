@@ -16,10 +16,11 @@ package authn
 
 import (
 	"context"
-	"github.com/greenpau/go-authcrunch/pkg/requests"
 	"net/http"
 	"path"
 	"strings"
+
+	"github.com/greenpau/go-authcrunch/pkg/requests"
 )
 
 func (p *Portal) handleHTTPExternalLogout(ctx context.Context, w http.ResponseWriter, r *http.Request, rr *requests.Request, authMethod string) error {
@@ -37,6 +38,11 @@ func (p *Portal) handleHTTPExternalLogout(ctx context.Context, w http.ResponseWr
 	providerIdentityTokenCookieName := provider.GetIdentityTokenCookieName()
 	if providerIdentityTokenCookieName != "" {
 		w.Header().Add("Set-Cookie", p.cookie.GetDeleteIdentityTokenCookie(providerIdentityTokenCookieName))
+	}
+
+	_, err1 := rr.Upstream.Request.Cookie("refresh_token")
+	if err1 == nil {
+		w.Header().Add("Set-Cookie", p.cookie.GetDeleteIdentityTokenCookie("refresh_token"))
 	}
 
 	cfg := provider.GetConfig()

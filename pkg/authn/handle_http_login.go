@@ -368,7 +368,7 @@ func (p *Portal) authorizeLoginRequest(ctx context.Context, w http.ResponseWrite
 		}
 	}
 
-	p.logger.Info(
+	p.logger.Debug(
 		"Successful login",
 		zap.String("session_id", rr.Upstream.SessionID),
 		zap.String("request_id", rr.ID),

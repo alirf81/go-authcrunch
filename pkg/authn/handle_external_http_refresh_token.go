@@ -82,7 +82,7 @@ func (p *Portal) handleHTTPExternalRefreshToken(ctx context.Context, w http.Resp
 		w.WriteHeader(http.StatusBadRequest)
 		return nil
 	case http.StatusOK:
-		p.logger.Info(
+		p.logger.Debug(
 			"Successful token refresh",
 			zap.String("session_id", rr.Upstream.SessionID),
 			zap.String("request_id", rr.ID),

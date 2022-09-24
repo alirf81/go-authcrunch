@@ -21,6 +21,7 @@ import (
 
 	"github.com/greenpau/go-authcrunch/pkg/authn/enums/operator"
 	"github.com/greenpau/go-authcrunch/pkg/requests"
+	addrutil "github.com/greenpau/go-authcrunch/pkg/util/addr"
 	"go.uber.org/zap"
 )
 
@@ -80,6 +81,18 @@ func (p *Portal) handleHTTPExternalRefreshToken(ctx context.Context, w http.Resp
 	switch rr.Response.Code {
 	case http.StatusBadRequest:
 		w.WriteHeader(http.StatusBadRequest)
+		h := addrutil.GetSourceHost(r)
+		for tokenName := range p.validator.GetAuthCookies() {
+			w.Header().Add("Set-Cookie", p.cookie.GetDeleteCookie(h, tokenName))
+		}
+		providerIdentityTokenCookieName := provider.GetIdentityTokenCookieName()
+		if providerIdentityTokenCookieName != "" {
+			w.Header().Add("Set-Cookie", p.cookie.GetDeleteIdentityTokenCookie(providerIdentityTokenCookieName))
+		}
+		_, err1 := rr.Upstream.Request.Cookie("refresh_token")
+		if err1 == nil {
+			w.Header().Add("Set-Cookie", p.cookie.GetDeleteIdentityTokenCookie("refresh_token"))
+		}
 		return nil
 	case http.StatusOK:
 		p.logger.Debug(

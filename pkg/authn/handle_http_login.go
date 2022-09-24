@@ -455,6 +455,8 @@ func (p *Portal) grantAccess(ctx context.Context, w http.ResponseWriter, r *http
 	if rr.DisableRedirect != true {
 		w.Header().Set("Location", redirectLocation)
 		rr.Response.Code = http.StatusSeeOther
+	} else {
+		rr.Response.Code = http.StatusOK
 	}
 	return
 }

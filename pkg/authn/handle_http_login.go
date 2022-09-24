@@ -351,7 +351,7 @@ func (p *Portal) authorizeLoginRequest(ctx context.Context, w http.ResponseWrite
 	usr.Authenticator.Realm = backend["realm"]
 	usr.Authenticator.Method = backend["kind"]
 
-	// copy the latest refresh token from request to user session
+	// Copy the latest refresh token from request to user session
 	usr.RefreshToken = rr.RefreshToken
 
 	// Build a list of additional user-specific UI links.

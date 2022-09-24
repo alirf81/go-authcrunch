@@ -40,11 +40,6 @@ func (p *Portal) handleHTTPExternalLogout(ctx context.Context, w http.ResponseWr
 		w.Header().Add("Set-Cookie", p.cookie.GetDeleteIdentityTokenCookie(providerIdentityTokenCookieName))
 	}
 
-	_, err1 := rr.Upstream.Request.Cookie("refresh_token")
-	if err1 == nil {
-		w.Header().Add("Set-Cookie", p.cookie.GetDeleteIdentityTokenCookie("refresh_token"))
-	}
-
 	cfg := provider.GetConfig()
 	logoutEnabled := false
 	if v, exists := cfg["logout_enabled"]; exists {

@@ -16,13 +16,14 @@ package authn
 
 import (
 	"context"
+	"net/http"
+	"net/url"
+	"strings"
+
 	"github.com/greenpau/go-authcrunch/pkg/requests"
 	"github.com/greenpau/go-authcrunch/pkg/user"
 	addrutil "github.com/greenpau/go-authcrunch/pkg/util/addr"
 	"go.uber.org/zap"
-	"net/http"
-	"net/url"
-	"strings"
 )
 
 func (p *Portal) deleteAuthCookies(w http.ResponseWriter, r *http.Request) {
@@ -40,6 +41,11 @@ func (p *Portal) handleHTTPLogout(ctx context.Context, w http.ResponseWriter, r 
 	}
 	w.Header().Add("Set-Cookie", p.cookie.GetDeleteCookie(h, p.cookie.Referer))
 	w.Header().Add("Set-Cookie", p.cookie.GetDeleteCookie(h, p.cookie.SessionID))
+
+	if parsedUser != nil {
+		// Clean refresh token in user session
+		parsedUser.RefreshToken = ""
+	}
 
 	if parsedUser != nil && parsedUser.Claims != nil {
 		p.logger.Debug(

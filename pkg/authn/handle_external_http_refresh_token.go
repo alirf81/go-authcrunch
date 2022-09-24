@@ -76,7 +76,7 @@ func (p *Portal) handleHTTPExternalRefreshToken(ctx context.Context, w http.Resp
 	}
 
 	p.logger.Warn("2222222222222: " + usr.RefreshToken)
-	// copy the old refresh token from user session to request
+	// Copy the old refresh token from user session to request
 	rr.RefreshToken = usr.RefreshToken
 	if rr.RefreshToken == "" {
 		p.logger.Warn(
@@ -133,10 +133,6 @@ func (p *Portal) handleHTTPExternalRefreshToken(ctx context.Context, w http.Resp
 		providerIdentityTokenCookieName := provider.GetIdentityTokenCookieName()
 		if providerIdentityTokenCookieName != "" {
 			w.Header().Add("Set-Cookie", p.cookie.GetDeleteIdentityTokenCookie(providerIdentityTokenCookieName))
-		}
-		_, err1 := rr.Upstream.Request.Cookie("refresh_token")
-		if err1 == nil {
-			w.Header().Add("Set-Cookie", p.cookie.GetDeleteIdentityTokenCookie("refresh_token"))
 		}
 		return nil
 	case http.StatusOK:

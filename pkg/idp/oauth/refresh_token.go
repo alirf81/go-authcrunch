@@ -98,7 +98,7 @@ func (b *IdentityProvider) RefreshToken(r *requests.Request) error {
 		}
 	}
 
-	// Update refresh token
+	// Save new refresh token in request
 	if accessToken != nil {
 		if _, exists := accessToken["refresh_token"]; exists {
 			r.RefreshToken = accessToken["refresh_token"].(string)

@@ -111,7 +111,7 @@ func (b *IdentityProvider) RefreshToken(r *requests.Request) error {
 	// Add refresh token
 	if accessToken != nil {
 		if _, exists := accessToken["refresh_token"]; exists {
-			r.Response.RefreshToken = accessToken["refresh_token"].(string)
+			r.RefreshToken = accessToken["refresh_token"].(string)
 		} else {
 			b.logger.Warn("cannot find refresh token in OAtuh 2.0 response")
 		}

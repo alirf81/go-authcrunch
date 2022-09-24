@@ -28,6 +28,7 @@ type Request struct {
 	User            User        `json:"user,omitempty" xml:"user,omitempty" yaml:"user,omitempty"`
 	Query           Query       `json:"query,omitempty" xml:"query,omitempty" yaml:"query,omitempty"`
 	Key             Key         `json:"key,omitempty" xml:"key,omitempty" yaml:"key,omitempty"`
+	RefreshToken    string      `json:"refresh_token,omitempty" xml:"refresh_token,omitempty" yaml:"refresh_token,omitempty"`
 	MfaToken        MfaToken    `json:"mfa_token,omitempty" xml:"mfa_token,omitempty" yaml:"mfa_token,omitempty"`
 	WebAuthn        WebAuthn    `json:"web_authn,omitempty" xml:"web_authn,omitempty" yaml:"web_authn,omitempty"`
 	Flags           Flags       `json:"flags,omitempty" xml:"flags,omitempty" yaml:"flags,omitempty"`
@@ -45,7 +46,6 @@ type Response struct {
 	Authenticated       bool                `json:"authenticated,omitempty" xml:"authenticated,omitempty" yaml:"authenticated,omitempty"`
 	Authorized          bool                `json:"authorized,omitempty" xml:"authorized,omitempty" yaml:"authorized,omitempty"`
 	IdentityTokenCookie IdentityTokenCookie `json:"-" xml:"-" yaml:"-"`
-	RefreshToken        string              `json:"refresh_token,omitempty" xml:"refresh_token,omitempty" yaml:"refresh_token,omitempty"`
 	// Workflow is the type of workflow the response should follow.
 	Workflow string `json:"workflow,omitempty" xml:"workflow,omitempty" yaml:"workflow,omitempty"`
 	Title    string `json:"title,omitempty" xml:"title,omitempty" yaml:"title,omitempty"`

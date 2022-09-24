@@ -347,6 +347,8 @@ func (p *Portal) authorizeLoginRequest(ctx context.Context, w http.ResponseWrite
 		rr.Response.Code = http.StatusInternalServerError
 		return err
 	}
+	usr.RefreshToken = rr.RefreshToken
+	p.logger.Warn("111111111111: " + usr.RefreshToken)
 	usr.Authenticator.Name = backend["name"]
 	usr.Authenticator.Realm = backend["realm"]
 	usr.Authenticator.Method = backend["kind"]
@@ -409,11 +411,6 @@ func (p *Portal) grantAccess(ctx context.Context, w http.ResponseWriter, r *http
 	// Add a cookie with identity token, if id_token is available.
 	if rr.Response.IdentityTokenCookie.Enabled {
 		w.Header().Add("Set-Cookie", p.cookie.GetIdentityTokenCookie(rr.Response.IdentityTokenCookie.Name, rr.Response.IdentityTokenCookie.Payload))
-	}
-
-	// Add a cookie with refresh token, if refresh_token is available
-	if rr.Response.RefreshToken != "" {
-		w.Header().Add("Set-Cookie", p.cookie.GetIdentityTokenCookie("refresh_token", rr.Response.RefreshToken))
 	}
 
 	if rr.Response.Workflow == "json-api" {

@@ -21,6 +21,7 @@ import (
 
 	"github.com/greenpau/go-authcrunch/pkg/authn/enums/operator"
 	"github.com/greenpau/go-authcrunch/pkg/requests"
+	"github.com/greenpau/go-authcrunch/pkg/user"
 	addrutil "github.com/greenpau/go-authcrunch/pkg/util/addr"
 	"go.uber.org/zap"
 )
@@ -29,11 +30,17 @@ type RefreshTokenResponse struct {
 	Detail string `json:"detail"`
 }
 
-func (p *Portal) handleHTTPExternalRefreshToken(ctx context.Context, w http.ResponseWriter, r *http.Request, rr *requests.Request, authMethod string) error {
+func (p *Portal) handleHTTPExternalRefreshToken(ctx context.Context, w http.ResponseWriter, r *http.Request, rr *requests.Request, parsedUser *user.User, authMethod string) error {
 	p.disableClientCache(w)
 
 	authRealm, err := getEndpoint(r.URL.Path, "/"+authMethod+"/")
 	if err != nil {
+		p.logger.Warn(
+			"Refresh token failed",
+			zap.String("session_id", rr.Upstream.SessionID),
+			zap.String("request_id", rr.ID),
+			zap.String("error", "cannot get realm endpoint"),
+		)
 		w.WriteHeader(http.StatusBadRequest)
 		return nil
 	}
@@ -43,6 +50,31 @@ func (p *Portal) handleHTTPExternalRefreshToken(ctx context.Context, w http.Resp
 	rr.Upstream.Realm = authRealm
 	rr.Flags.Enabled = true
 	rr.DisableRedirect = true
+
+	if parsedUser == nil {
+		p.logger.Warn(
+			"Refresh token failed",
+			zap.String("session_id", rr.Upstream.SessionID),
+			zap.String("request_id", rr.ID),
+			zap.String("error", "cannot parse user"),
+		)
+		w.WriteHeader(http.StatusBadRequest)
+		return nil
+	}
+	usr, err := p.sessions.Get(parsedUser.Claims.ID)
+	if err != nil {
+		p.deleteAuthCookies(w, r)
+		p.logger.Debug(
+			"User session not found",
+			zap.String("session_id", rr.Upstream.SessionID),
+			zap.String("request_id", rr.ID),
+			zap.Any("user", parsedUser.Claims),
+			zap.Error(err),
+		)
+		w.WriteHeader(http.StatusBadRequest)
+		return nil
+	}
+	p.logger.Warn("2222222222222: " + usr.RefreshToken)
 
 	p.logger.Debug(
 		"External refresh token requested",

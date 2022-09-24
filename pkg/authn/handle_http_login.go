@@ -347,11 +347,12 @@ func (p *Portal) authorizeLoginRequest(ctx context.Context, w http.ResponseWrite
 		rr.Response.Code = http.StatusInternalServerError
 		return err
 	}
-	usr.RefreshToken = rr.RefreshToken
-	p.logger.Warn("111111111111: " + usr.RefreshToken)
 	usr.Authenticator.Name = backend["name"]
 	usr.Authenticator.Realm = backend["realm"]
 	usr.Authenticator.Method = backend["kind"]
+
+	// copy the latest refresh token from request to user session
+	usr.RefreshToken = rr.RefreshToken
 
 	// Build a list of additional user-specific UI links.
 	if rr.Response.Workflow != "json-api" {

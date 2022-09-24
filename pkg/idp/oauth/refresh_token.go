@@ -32,25 +32,15 @@ import (
 func (b *IdentityProvider) RefreshToken(r *requests.Request) error {
 
 	r.Response.Code = http.StatusBadRequest
-	refreshTokenCookie, err1 := r.Upstream.Request.Cookie("refresh_token")
-	if err1 != nil {
-		b.logger.Debug(
-			"failed to read refresh token from cookie",
-			zap.String("session_id", r.Upstream.SessionID),
-			zap.String("request_id", r.ID),
-			zap.Error(err1),
-		)
-		return errors.ErrIdentityProviderOauthReadRefreshTokenFailed.WithArgs(err1)
-	}
 
 	var accessToken map[string]interface{}
 	var err error
-	accessToken, err = b.fetchRefreshedAccessToken(refreshTokenCookie.Value)
+	accessToken, err = b.fetchRefreshedAccessToken(r.RefreshToken)
 	switch b.config.Driver {
 	case "facebook":
 		return errors.ErrIdentityProviderOauthRefreshTokenNotImplemented
 	default:
-		accessToken, err = b.fetchRefreshedAccessToken(refreshTokenCookie.Value)
+		accessToken, err = b.fetchRefreshedAccessToken(r.RefreshToken)
 	}
 	if err != nil {
 		b.logger.Debug(
@@ -108,7 +98,7 @@ func (b *IdentityProvider) RefreshToken(r *requests.Request) error {
 		}
 	}
 
-	// Add refresh token
+	// Update refresh token
 	if accessToken != nil {
 		if _, exists := accessToken["refresh_token"]; exists {
 			r.RefreshToken = accessToken["refresh_token"].(string)

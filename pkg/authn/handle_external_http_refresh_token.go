@@ -74,7 +74,20 @@ func (p *Portal) handleHTTPExternalRefreshToken(ctx context.Context, w http.Resp
 		w.WriteHeader(http.StatusBadRequest)
 		return nil
 	}
+
 	p.logger.Warn("2222222222222: " + usr.RefreshToken)
+	// copy the old refresh token from user session to request
+	rr.RefreshToken = usr.RefreshToken
+	if rr.RefreshToken == "" {
+		p.logger.Warn(
+			"Refresh token failed",
+			zap.String("session_id", rr.Upstream.SessionID),
+			zap.String("request_id", rr.ID),
+			zap.String("error", "no refresh token in session"),
+		)
+		w.WriteHeader(http.StatusBadRequest)
+		return nil
+	}
 
 	p.logger.Debug(
 		"External refresh token requested",

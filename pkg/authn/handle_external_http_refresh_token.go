@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	"github.com/greenpau/go-authcrunch/pkg/authn/enums/operator"
+	"github.com/greenpau/go-authcrunch/pkg/idp"
 	"github.com/greenpau/go-authcrunch/pkg/requests"
 	"github.com/greenpau/go-authcrunch/pkg/user"
 	addrutil "github.com/greenpau/go-authcrunch/pkg/util/addr"
@@ -51,44 +52,6 @@ func (p *Portal) handleHTTPExternalRefreshToken(ctx context.Context, w http.Resp
 	rr.Flags.Enabled = true
 	rr.DisableRedirect = true
 
-	if parsedUser == nil {
-		p.logger.Warn(
-			"Refresh token failed",
-			zap.String("session_id", rr.Upstream.SessionID),
-			zap.String("request_id", rr.ID),
-			zap.String("error", "cannot parse user"),
-		)
-		w.WriteHeader(http.StatusBadRequest)
-		return nil
-	}
-	usr, err := p.sessions.Get(parsedUser.Claims.ID)
-	if err != nil {
-		p.deleteAuthCookies(w, r)
-		p.logger.Debug(
-			"User session not found",
-			zap.String("session_id", rr.Upstream.SessionID),
-			zap.String("request_id", rr.ID),
-			zap.Any("user", parsedUser.Claims),
-			zap.Error(err),
-		)
-		w.WriteHeader(http.StatusBadRequest)
-		return nil
-	}
-
-	p.logger.Warn("2222222222222: " + usr.RefreshToken)
-	// Copy the old refresh token from user session to request
-	rr.RefreshToken = usr.RefreshToken
-	if rr.RefreshToken == "" {
-		p.logger.Warn(
-			"Refresh token failed",
-			zap.String("session_id", rr.Upstream.SessionID),
-			zap.String("request_id", rr.ID),
-			zap.String("error", "no refresh token in session"),
-		)
-		w.WriteHeader(http.StatusBadRequest)
-		return nil
-	}
-
 	p.logger.Debug(
 		"External refresh token requested",
 		zap.String("session_id", rr.Upstream.SessionID),
@@ -109,8 +72,52 @@ func (p *Portal) handleHTTPExternalRefreshToken(ctx context.Context, w http.Resp
 			zap.String("error", "identity provider not found"),
 		)
 		w.WriteHeader(http.StatusBadRequest)
+		p.deleteAccessCookies(w, r, provider)
 		return nil
 	}
+
+	// Get user from session
+	if parsedUser == nil {
+		p.logger.Warn(
+			"Refresh token failed",
+			zap.String("session_id", rr.Upstream.SessionID),
+			zap.String("request_id", rr.ID),
+			zap.String("error", "cannot parse user"),
+		)
+		w.WriteHeader(http.StatusBadRequest)
+		p.deleteAccessCookies(w, r, provider)
+		return nil
+	}
+	usr, err := p.sessions.Get(parsedUser.Claims.ID)
+	if err != nil {
+		p.deleteAuthCookies(w, r)
+		p.logger.Debug(
+			"User session not found",
+			zap.String("session_id", rr.Upstream.SessionID),
+			zap.String("request_id", rr.ID),
+			zap.Any("user", parsedUser.Claims),
+			zap.Error(err),
+		)
+		w.WriteHeader(http.StatusBadRequest)
+		p.deleteAccessCookies(w, r, provider)
+		return nil
+	}
+
+	// Copy the old refresh token from user session to request
+	rr.RefreshToken = usr.RefreshToken
+	if rr.RefreshToken == "" {
+		p.logger.Warn(
+			"Refresh token failed",
+			zap.String("session_id", rr.Upstream.SessionID),
+			zap.String("request_id", rr.ID),
+			zap.String("error", "no refresh token in session"),
+		)
+		w.WriteHeader(http.StatusBadRequest)
+		p.deleteAccessCookies(w, r, provider)
+		return nil
+	}
+
+	// Perform refresh token
 	err = provider.Request(operator.RefreshToken, rr)
 	if err != nil {
 		p.logger.Warn(
@@ -120,20 +127,14 @@ func (p *Portal) handleHTTPExternalRefreshToken(ctx context.Context, w http.Resp
 			zap.Error(err),
 		)
 		w.WriteHeader(http.StatusBadRequest)
+		p.deleteAccessCookies(w, r, provider)
 		return nil
 	}
 
 	switch rr.Response.Code {
 	case http.StatusBadRequest:
 		w.WriteHeader(http.StatusBadRequest)
-		h := addrutil.GetSourceHost(r)
-		for tokenName := range p.validator.GetAuthCookies() {
-			w.Header().Add("Set-Cookie", p.cookie.GetDeleteCookie(h, tokenName))
-		}
-		providerIdentityTokenCookieName := provider.GetIdentityTokenCookieName()
-		if providerIdentityTokenCookieName != "" {
-			w.Header().Add("Set-Cookie", p.cookie.GetDeleteIdentityTokenCookie(providerIdentityTokenCookieName))
-		}
+		p.deleteAccessCookies(w, r, provider)
 		return nil
 	case http.StatusOK:
 		p.logger.Debug(
@@ -148,11 +149,29 @@ func (p *Portal) handleHTTPExternalRefreshToken(ctx context.Context, w http.Resp
 		w.WriteHeader(http.StatusNotImplemented)
 		return nil
 	}
+
 	// User refreshed token successfully
 	if err := p.authorizeLoginRequest(ctx, w, r, rr); err != nil {
 		w.WriteHeader(rr.Response.Code)
+		if rr.Response.Code != http.StatusOK {
+			p.deleteAccessCookies(w, r, provider)
+		}
 		return nil
 	}
 	w.WriteHeader(rr.Response.Code)
+	if rr.Response.Code != http.StatusOK {
+		p.deleteAccessCookies(w, r, provider)
+	}
 	return nil
+}
+
+func (p *Portal) deleteAccessCookies(w http.ResponseWriter, r *http.Request, provider idp.IdentityProvider) {
+	h := addrutil.GetSourceHost(r)
+	for tokenName := range p.validator.GetAuthCookies() {
+		w.Header().Add("Set-Cookie", p.cookie.GetDeleteCookie(h, tokenName))
+	}
+	providerIdentityTokenCookieName := provider.GetIdentityTokenCookieName()
+	if providerIdentityTokenCookieName != "" {
+		w.Header().Add("Set-Cookie", p.cookie.GetDeleteIdentityTokenCookie(providerIdentityTokenCookieName))
+	}
 }

@@ -163,6 +163,15 @@ func (b *IdentityProvider) Authenticate(r *requests.Request) error {
 				}
 			}
 
+			// Save refresh token in request
+			if accessToken != nil {
+				if _, exists := accessToken["refresh_token"]; exists {
+					r.RefreshToken = accessToken["refresh_token"].(string)
+				} else {
+					b.logger.Warn("cannot find refresh token in OAtuh 2.0 response")
+				}
+			}
+
 			r.Response.Payload = m
 			r.Response.Code = http.StatusOK
 			b.logger.Debug(

@@ -317,7 +317,7 @@ func (p *Portal) authorizeLoginRequest(ctx context.Context, w http.ResponseWrite
 	}
 
 	m["jti"] = rr.Upstream.SessionID
-	m["exp"] = time.Now().Add(time.Duration(p.keystore.GetTokenLifetime(nil, nil)) * time.Second).UTC().Unix()
+	// m["exp"] = time.Now().Add(time.Duration(p.keystore.GetTokenLifetime(nil, nil)) * time.Second).UTC().Unix()
 	m["iat"] = time.Now().UTC().Unix()
 	m["nbf"] = time.Now().Add(time.Duration(60)*time.Second*-1).UTC().Unix() * 1000
 	if _, exists := m["origin"]; !exists {
@@ -351,6 +351,9 @@ func (p *Portal) authorizeLoginRequest(ctx context.Context, w http.ResponseWrite
 	usr.Authenticator.Realm = backend["realm"]
 	usr.Authenticator.Method = backend["kind"]
 
+	// Copy the latest refresh token from request to user session
+	usr.RefreshToken = rr.RefreshToken
+
 	// Build a list of additional user-specific UI links.
 	if rr.Response.Workflow != "json-api" {
 		if v, exists := m["frontend_links"]; exists {
@@ -368,7 +371,7 @@ func (p *Portal) authorizeLoginRequest(ctx context.Context, w http.ResponseWrite
 		}
 	}
 
-	p.logger.Info(
+	p.logger.Debug(
 		"Successful login",
 		zap.String("session_id", rr.Upstream.SessionID),
 		zap.String("request_id", rr.ID),
@@ -382,7 +385,7 @@ func (p *Portal) authorizeLoginRequest(ctx context.Context, w http.ResponseWrite
 func (p *Portal) grantAccess(ctx context.Context, w http.ResponseWriter, r *http.Request, rr *requests.Request, usr *user.User) {
 	var redirectLocation string
 
-	usr.SetExpiresAtClaim(time.Now().Add(time.Duration(p.keystore.GetTokenLifetime(nil, nil)) * time.Second).UTC().Unix())
+	// usr.SetExpiresAtClaim(time.Now().Add(time.Duration(p.keystore.GetTokenLifetime(nil, nil)) * time.Second).UTC().Unix())
 	usr.SetIssuedAtClaim(time.Now().UTC().Unix())
 	usr.SetNotBeforeClaim(time.Now().Add(time.Duration(60) * time.Second * -1).UTC().Unix())
 
@@ -447,8 +450,12 @@ func (p *Portal) grantAccess(ctx context.Context, w http.ResponseWriter, r *http
 		// Redirect authenticated user to portal page when no redirect cookie found.
 		redirectLocation = rr.Upstream.BaseURL + path.Join(rr.Upstream.BasePath, "/portal")
 	}
-	w.Header().Set("Location", redirectLocation)
-	rr.Response.Code = http.StatusSeeOther
+	if rr.DisableRedirect != true {
+		w.Header().Set("Location", redirectLocation)
+		rr.Response.Code = http.StatusSeeOther
+	} else {
+		rr.Response.Code = http.StatusOK
+	}
 	return
 }
 

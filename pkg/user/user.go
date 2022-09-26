@@ -17,11 +17,12 @@ package user
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/greenpau/go-authcrunch/pkg/errors"
 	cfgutil "github.com/greenpau/go-authcrunch/pkg/util/cfg"
 	datautil "github.com/greenpau/go-authcrunch/pkg/util/data"
-	"strings"
-	"time"
 )
 
 /*
@@ -43,6 +44,7 @@ type User struct {
 	Token           string        `json:"token,omitempty" xml:"token,omitempty" yaml:"token,omitempty"`
 	TokenName       string        `json:"token_name,omitempty" xml:"token_name,omitempty" yaml:"token_name,omitempty"`
 	TokenSource     string        `json:"token_source,omitempty" xml:"token_source,omitempty" yaml:"token_source,omitempty"`
+	RefreshToken    string        `json:"refresh_token,omitempty" xml:"refresh_token,omitempty" yaml:"refresh_token,omitempty"`
 	Authenticator   Authenticator `json:"authenticator,omitempty" xml:"authenticator,omitempty" yaml:"authenticator,omitempty"`
 	Checkpoints     []*Checkpoint `json:"checkpoints,omitempty" xml:"checkpoints,omitempty" yaml:"checkpoints,omitempty"`
 	Authorized      bool          `json:"authorized,omitempty" xml:"authorized,omitempty" yaml:"authorized,omitempty"`

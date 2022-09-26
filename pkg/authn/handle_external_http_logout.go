@@ -16,10 +16,11 @@ package authn
 
 import (
 	"context"
-	"github.com/greenpau/go-authcrunch/pkg/requests"
 	"net/http"
 	"path"
 	"strings"
+
+	"github.com/greenpau/go-authcrunch/pkg/requests"
 )
 
 func (p *Portal) handleHTTPExternalLogout(ctx context.Context, w http.ResponseWriter, r *http.Request, rr *requests.Request, authMethod string) error {

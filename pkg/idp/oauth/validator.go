@@ -16,10 +16,11 @@ package oauth
 
 import (
 	"fmt"
+	"strings"
+
 	jwtlib "github.com/golang-jwt/jwt/v4"
 	"github.com/greenpau/go-authcrunch/pkg/errors"
 	"github.com/greenpau/go-authcrunch/pkg/kms"
-	"strings"
 )
 
 var (
@@ -87,8 +88,10 @@ func (b *IdentityProvider) validateAccessToken(state string, data map[string]int
 	if _, exists := claims["nonce"]; !exists {
 		return nil, errors.ErrIdentityProviderOAuthNonceValidationFailed.WithArgs(b.config.IdentityTokenName, "nonce not found")
 	}
-	if err := b.state.validateNonce(state, claims["nonce"].(string)); err != nil {
-		return nil, errors.ErrIdentityProviderOAuthNonceValidationFailed.WithArgs(b.config.IdentityTokenName, err)
+	if state != "" {
+		if err := b.state.validateNonce(state, claims["nonce"].(string)); err != nil {
+			return nil, errors.ErrIdentityProviderOAuthNonceValidationFailed.WithArgs(b.config.IdentityTokenName, err)
+		}
 	}
 
 	if !b.disableEmailClaimCheck {

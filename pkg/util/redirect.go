@@ -48,7 +48,7 @@ func GetCurrentURL(r *http.Request) string {
 // GetIssuerURL returns issuer URL.
 func GetIssuerURL(r *http.Request) string {
 	s := GetCurrentURL(r)
-	if !strings.HasSuffix(s, "callback") {
+	if !strings.HasSuffix(s, "callback") && !strings.HasSuffix(s, "refresh-token") {
 		return s
 	}
 	s = strings.TrimRightFunc(s, func(r rune) bool {

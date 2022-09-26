@@ -54,7 +54,7 @@ func (p *Portal) handleHTTP(ctx context.Context, w http.ResponseWriter, r *http.
 		return p.handleHTTPAppsMobileAccess(ctx, w, r, rr, usr)
 	case strings.Contains(r.URL.Path, "/oauth2/") && strings.HasSuffix(r.URL.Path, "/logout"):
 		return p.handleHTTPExternalLogout(ctx, w, r, rr, "oauth2")
-	case strings.Contains(r.URL.Path, "/oauth2/") && strings.HasSuffix(r.URL.Path, "/refreshtoken"):
+	case strings.Contains(r.URL.Path, "/oauth2/") && strings.HasSuffix(r.URL.Path, "/refresh-token"):
 		return p.handleHTTPExternalRefreshToken(ctx, w, r, rr, usr, "oauth2")
 	case strings.Contains(r.URL.Path, "/saml/"):
 		return p.handleHTTPExternalLogin(ctx, w, r, rr, "saml")

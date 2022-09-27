@@ -155,7 +155,11 @@ func (p *Portal) handleHTTPGeneric(ctx context.Context, w http.ResponseWriter, r
 
 func (p *Portal) handleHTTPRedirect(ctx context.Context, w http.ResponseWriter, r *http.Request, rr *requests.Request, location string) error {
 	p.disableClientCache(w)
-	location = rr.Upstream.BaseURL + path.Join(rr.Upstream.BasePath, location)
+	if location == "/" {
+		location = rr.Upstream.BaseURL + location
+	} else {
+		location = rr.Upstream.BaseURL + path.Join(rr.Upstream.BasePath, location)
+	}
 	w.Header().Set("Location", location)
 	p.logger.Debug(
 		"Redirect served",

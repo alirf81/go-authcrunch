@@ -16,15 +16,16 @@ package authn
 
 import (
 	"context"
+	"net/http"
+	"path"
+	"strings"
+	"time"
+
 	"github.com/greenpau/go-authcrunch/pkg/authn/validators"
 	"github.com/greenpau/go-authcrunch/pkg/requests"
 	"github.com/greenpau/go-authcrunch/pkg/util"
 	addrutil "github.com/greenpau/go-authcrunch/pkg/util/addr"
 	"go.uber.org/zap"
-	"net/http"
-	"path"
-	"strings"
-	"time"
 )
 
 type registerRequest struct {
@@ -37,7 +38,7 @@ func (p *Portal) handleHTTPRegister(ctx context.Context, w http.ResponseWriter, 
 	p.disableClientCache(w)
 	if rr.Response.Authenticated {
 		// Authenticated users are not allowed to register.
-		return p.handleHTTPRedirect(ctx, w, r, rr, "/portal")
+		return p.handleHTTPRedirect(ctx, w, r, rr, "/")
 	}
 
 	if strings.Contains(r.URL.Path, "/register/ack/") {

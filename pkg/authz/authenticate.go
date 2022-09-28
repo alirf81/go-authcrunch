@@ -173,9 +173,6 @@ func (g *Gatekeeper) handleAuthorizeWithBadRequest(w http.ResponseWriter, r *htt
 // other reasons.
 func (g *Gatekeeper) handleAuthorizeWithOther(w http.ResponseWriter, r *http.Request, ar *requests.AuthorizationRequest) error {
 	g.expireAuthCookies(w, r)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(401)
-	json.NewEncoder(w).Encode(ErrorMessage{"Unauthorized"})
 	return ar.Response.Error
 }
 

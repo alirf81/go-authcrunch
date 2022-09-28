@@ -128,8 +128,6 @@ func (g *Gatekeeper) handleUnauthorizedUser(w http.ResponseWriter, r *http.Reque
 
 	if !g.config.AuthRedirectDisabled {
 		return g.handleAuthorizeWithRedirect(w, r, ar)
-	} else {
-		return g.handleAuthorizeWithOther(w, r, ar)
 	}
 }
 

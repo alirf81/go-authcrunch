@@ -129,6 +129,7 @@ func (g *Gatekeeper) handleUnauthorizedUser(w http.ResponseWriter, r *http.Reque
 	if !g.config.AuthRedirectDisabled {
 		return g.handleAuthorizeWithRedirect(w, r, ar)
 	}
+	return nil
 }
 
 // expireAuthCookies sends cookie delete in HTTP response.

@@ -64,7 +64,6 @@ func HandleLocationHeaderRedirect(w http.ResponseWriter, r *http.Request, rr *re
 		sb.WriteString(rr.Redirect.QueryParameter)
 		sb.WriteString("=")
 		sb.WriteString(url.QueryEscape(rr.Redirect.URL))
-		sb.WriteString("&kc_idp_hint=saml-1")
 		w.Header().Set("Location", sb.String())
 	}
 
@@ -131,6 +130,13 @@ func configureRedirect(w http.ResponseWriter, r *http.Request, rr *requests.Auth
 		loginHint := rr.Redirect.LoginHint
 		escapedLoginHint := url.QueryEscape(loginHint)
 		rr.Redirect.AuthURL = fmt.Sprintf("%s%slogin_hint=%s", rr.Redirect.AuthURL, rr.Redirect.Separator, escapedLoginHint)
+		rr.Redirect.Separator = "&"
+	}
+
+	if len(rr.Redirect.IDPHint) > 0 {
+		idpHint := rr.Redirect.IDPHint
+		escapedIDPHint := url.QueryEscape(idpHint)
+		rr.Redirect.AuthURL = fmt.Sprintf("%s%sidp_hint=%s", rr.Redirect.AuthURL, rr.Redirect.Separator, escapedIDPHint)
 		rr.Redirect.Separator = "&"
 	}
 

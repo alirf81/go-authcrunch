@@ -334,6 +334,9 @@ func (g *Gatekeeper) handleLoginHint(r *http.Request, ar *requests.Authorization
 			ar.Redirect.LoginHint = loginHint
 		}
 	}
+	if idpHint := r.URL.Query().Get("idp_hint"); idpHint != "" {
+		ar.Redirect.IDPHint = idpHint
+	}
 }
 
 func (g *Gatekeeper) handleAdditionalScopes(r *http.Request, ar *requests.AuthorizationRequest) {

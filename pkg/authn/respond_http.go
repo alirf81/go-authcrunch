@@ -266,7 +266,7 @@ func (p *Portal) injectRedirectURL(ctx context.Context, w http.ResponseWriter, r
 	if r.Method == "GET" {
 		q := r.URL.Query()
 		if redirectURL, exists := q["redirect_url"]; exists {
-			c := p.cookie.GetCookie(addrutil.GetSourceHost(r), p.cookie.Referer, util.StripQueryParam(redirectURL[0], "login_hint"))
+			c := p.cookie.GetCookie(addrutil.GetSourceHost(r), p.cookie.Referer, util.StripQueryParam(util.StripQueryParam(redirectURL[0], "login_hint"), "idp_hint"))
 			p.logger.Debug(
 				"redirect recorded",
 				zap.String("session_id", rr.Upstream.SessionID),

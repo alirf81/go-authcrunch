@@ -50,6 +50,7 @@ type RedirectResponse struct {
 	URL              string `json:"url,omitempty" xml:"url,omitempty" yaml:"url,omitempty"`
 	StatusCode       int    `json:"status_code,omitempty" xml:"status_code,omitempty" yaml:"status_code,omitempty"`
 	LoginHint        string `json:"login_hint,omitempty" xml:"login_hint,omitempty" yaml:"login_hint,omitempty"`
+	IDPHint          string `json:"idp_hint,omitempty" xml:"idp_hint,omitempty" yaml:"idp_hint,omitempty"`
 	AdditionalScopes string `json:"additional_scopes,omitempty" xml:"additional_scopes,omitempty" yaml:"additional_scopes,omitempty"`
 }
 

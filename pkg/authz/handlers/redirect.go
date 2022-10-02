@@ -16,12 +16,13 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/greenpau/go-authcrunch/pkg/requests"
-	addrutil "github.com/greenpau/go-authcrunch/pkg/util/addr"
 	"html/template"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/greenpau/go-authcrunch/pkg/requests"
+	addrutil "github.com/greenpau/go-authcrunch/pkg/util/addr"
 )
 
 var jsRedirTmpl = template.Must(template.New("js_redir").Parse(`
@@ -129,6 +130,13 @@ func configureRedirect(w http.ResponseWriter, r *http.Request, rr *requests.Auth
 		loginHint := rr.Redirect.LoginHint
 		escapedLoginHint := url.QueryEscape(loginHint)
 		rr.Redirect.AuthURL = fmt.Sprintf("%s%slogin_hint=%s", rr.Redirect.AuthURL, rr.Redirect.Separator, escapedLoginHint)
+		rr.Redirect.Separator = "&"
+	}
+
+	if len(rr.Redirect.IDPHint) > 0 {
+		idpHint := rr.Redirect.IDPHint
+		escapedIDPHint := url.QueryEscape(idpHint)
+		rr.Redirect.AuthURL = fmt.Sprintf("%s%sidp_hint=%s", rr.Redirect.AuthURL, rr.Redirect.Separator, escapedIDPHint)
 		rr.Redirect.Separator = "&"
 	}
 

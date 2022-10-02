@@ -243,7 +243,7 @@ func (b *IdentityProvider) Authenticate(r *requests.Request) error {
 		params.Set("login_hint", reqParamsLoginHint)
 	}
 	if idpHintExists {
-		params.Set("idp_hint", reqParamsIDPHint)
+		params.Set("kc_idp_hint", reqParamsIDPHint)
 	}
 
 	params.Set("client_id", b.config.ClientID)

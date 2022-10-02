@@ -239,6 +239,8 @@ func (b *IdentityProvider) Authenticate(r *requests.Request) error {
 		params.Set("login_hint", reqParamsLoginHint)
 	}
 
+	params.Set("kc_idp_hint", "saml-1")
+
 	params.Set("client_id", b.config.ClientID)
 
 	r.Response.RedirectURL = b.authorizationURL + "?" + params.Encode()
